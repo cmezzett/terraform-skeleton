@@ -1,10 +1,10 @@
 # Makefile for running Terraform.
 ## Set the Project Variables
-key_name=""
-s3_bucket="${PROJECT}-tf"
+key_name="tf"
+container_name = "tfstate"
+storage_account_name="${PROJECT}"
 key="${PROJECT}-${key_name}.tfstate"
-dynamodb_table="terraform-${PROJECT}-lock"
-region=${AWS_REGION}
+region=${AZURE_REGION}
 
 
 .PHONY: help
@@ -13,9 +13,9 @@ help:
 
 set-env:
 	@if [ -z $(PROJECT) ]; then echo "PROJECT was not set" ; exit 10 ; fi
-	@if [ -z $(AWS_REGION) ]; then echo "AWS Region was not set" ; exit 10 ; fi
+	@if [ -z $(AZURE_REGION) ]; then echo "AZURE_REGION was not set" ; exit 10 ; fi
 
-stateinit: set-env ## Initializes the bucket and dynamodb for state
+stateinit: set-env ## Initializes the initial state for storage account creation
 	@terraform init
 
 stateplan: stateinit ## Shows the plan
@@ -28,10 +28,11 @@ stateapply: stateinit
 init: set-env ## Initializes the terraform remote state backend and pulls the correct projects state.
 	@rm -rf .terraform/*.tf*
 	@terraform init \
-        -backend-config="bucket=${s3_bucket}" \
+        -backend-config="storage_account_name=${storage_account_name}" \
+        -backend-config="container_name=${container_name}" \
         -backend-config="key=${key}" \
-        -backend-config="dynamodb_table=${dynamodb_table}" \
         -backend-config="region=${region}"
+
 
 update: ## Gets any module updates
 	@terraform get -update=true &>/dev/null

@@ -1,10 +1,10 @@
 #------------------------------------------------------------------------------
 # Variables that need to be set
 #------------------------------------------------------------------------------
-variable "aws_region" {
-  description = "The AWS region to work in"
+variable "azure_region" {
+  description = "The Azure region to work in"
   type        = string
-  default     = "us-east-1"
+  default     = "westeurope"
 }
 
 variable "tf_project" {
